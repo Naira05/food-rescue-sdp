@@ -25,6 +25,10 @@ public class Donor extends User{
     //implementation of class methods
     //public List<Donation> viewDonations(DonationController controller) {}
 
+    //also bc of the db
+    static Donor restore(int userId, String name, String email, String passwordHash, String address) {
+        return new Donor(userId, name, email, passwordHash,"user.donor", address );
+    }
     //getters and setters
     public String getAddress() {
         return address;
