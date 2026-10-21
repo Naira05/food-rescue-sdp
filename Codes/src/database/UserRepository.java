@@ -16,12 +16,12 @@ import java.util.Optional;
 
 public class UserRepository {
 
-    private record Row(int id, String role, String name, String email, String hash,
+    private record Row(int id, String role, String name, String email, String phone,String hash,
                        String address, String skills, String availability, String needs) { }
 
     public User insert(User u) {
-        String sql = "INSERT INTO users(role, name, email, password_hash, address, skills, "
-                + "availability, needs) VALUES (?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO users(role, name, email, phone, password_hash, address, skills, "
+                + "availability, needs) VALUES (?,?,?,?,?,?,?,?,?)";
 
         String address = null, skills = null, availability = null, needs = null;
 
@@ -38,11 +38,12 @@ public class UserRepository {
             ps.setString(1, roleOf(u));
             ps.setString(2, u.getName());
             ps.setString(3, u.getEmail());
-            ps.setString(4, u.getPasswordHash());
-            ps.setString(5, address);
-            ps.setString(6, skills);
-            ps.setString(7, availability);
-            ps.setString(8, needs);
+            ps.setString(4, u.getPhone());
+            ps.setString(5, u.getPasswordHash());
+            ps.setString(6, address);
+            ps.setString(7, skills);
+            ps.setString(8, availability);
+            ps.setString(9, needs);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not save user", e);
@@ -190,6 +191,7 @@ public class UserRepository {
                             rs.getString("role"),
                             rs.getString("name"),
                             rs.getString("email"),
+                            rs.getString("phone"),
                             rs.getString("password_hash"),
                             rs.getString("address"),
                             rs.getString("skills"),

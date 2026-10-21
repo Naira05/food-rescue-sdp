@@ -6,6 +6,7 @@ public abstract class User {
     private int userID;
     private String name;
     private String email;
+    private String phone;
     private String passwordHash;
     private String role;
     private boolean loggedIn;
@@ -42,6 +43,10 @@ public abstract class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getPhone() {return phone; }
+
+    public void setPhone(String phone) {this.phone = phone;}
 
     public String getPasswordHash() {
         return passwordHash;
