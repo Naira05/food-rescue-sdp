@@ -3,66 +3,89 @@ package donation;
 
 import database.DonationRepository;
 import donation.Donation;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class DonationModel {
+public class DonationModel implements DonationSubject {
+    private static final Logger LOG = Logger.getLogger(DonationModel.class.getName());
+
     private final DonationRepository repository;
-    private final List<Donation> donations = new ArrayList<>();
-    private final List<DonationObserver> observers = new ArrayList<>();
+    // CopyOnWriteArrayList: an observer may detach itself while being notified
+    private final CopyOnWriteArrayList<DonationObserver> observers = new CopyOnWriteArrayList<>();
 
     public DonationModel(DonationRepository repository) {
         this.repository = repository;
     }
 
     // observer things
+    @Override
     public void attach(DonationObserver o) {
-        if (!observers.contains(o)) {
-            observers.add(o);
-        }
+        Objects.requireNonNull(o, "observer");
+        observers.addIfAbsent(o);
     }
 
+    @Override
     public void detach(DonationObserver o) {
         observers.remove(o);
     }
 
-    public void notifyObservers(Donation d) {
+
+    @Override
+    public void notifyObservers(DonationEvent event) {
         for (DonationObserver o : observers) {
-            o.update(d);
+            try {
+                o.update(event);
+            } catch (RuntimeException e) {
+                LOG.log(Level.WARNING, "Observer " + o.getClass().getSimpleName()
+                        + " failed on " + event.type(), e);
+            }
         }
+    }
+
+    public void notifyObservers(Donation d) {
+        notifyObservers(DonationEvent.updated(d));
     }
 
     // donation methods
     public Donation saveDonation(Donation donation) {
         repository.insert(donation);
-        notifyObservers(donation);
+        notifyObservers(DonationEvent.created(donation));
         return donation;
     }
-   public Optional<Donation> findDonation(int id){
+    public Optional<Donation> findDonation(int id){
         return repository.findById(id);
-   }
-   public List<Donation> findAll(){
+    }
+    public List<Donation> findAll(){
         return repository.findAll();
-   }
-   public List<Donation> findByDonor(int donorId){
+    }
+    public List<Donation> findByDonor(int donorId){
         return repository.findByDonor(donorId);
 
-   }
-   public Donation updateDonation(Donation d){
+    }
+    public Donation updateDonation(Donation d){
+        // read the stored version first so we can tell whether the status changed
+        Optional<Donation> before = repository.findById(d.getDonationID());
         if(!repository.update(d)){
             throw new IllegalArgumentException("No donation with ID: " + d.getDonationID() + "was found");
         }
-        notifyObservers(d);
+        if (before.isPresent() && before.get().getSt() != d.getSt()) {
+            notifyObservers(DonationEvent.statusChanged(d, before.get().getSt()));
+        } else {
+            notifyObservers(DonationEvent.updated(d));
+        }
         return d;
-   }
-   public boolean removeDonation(int id){
+    }
+    public boolean removeDonation(int id){
         Optional<Donation> currentDonation = repository.findById(id);
         if(currentDonation.isEmpty()){
             return false;
         }
         repository.delete(id);
-        notifyObservers(currentDonation.get());
+        notifyObservers(DonationEvent.removed(currentDonation.get()));
         return true;
-   }
+    }
 }
