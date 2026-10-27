@@ -1,6 +1,5 @@
-
-//this class needs so many edits
 package database;
+
 import user.*;
 
 import java.sql.Connection;
@@ -8,17 +7,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+/** All SQL for the users table. One table holds every role. */
 public class UserRepository {
 
-    private record Row(int id, String role, String name, String email, String phone,String hash,
+    /** Raw row from the users table, turned into a User after the query has closed. */
+    private record Row(int id, String role, String name, String email, String phone, String hash,
                        String address, String skills, String availability, String needs) { }
 
+    // ---- create ---------------------------------------------------------------
+    /** Inserts the user and returns it again with its database-generated id. */
     public User insert(User u) {
         String sql = "INSERT INTO users(role, name, email, phone, password_hash, address, skills, "
                 + "availability, needs) VALUES (?,?,?,?,?,?,?,?,?)";
@@ -52,11 +54,13 @@ public class UserRepository {
         return findById(lastInsertId()).orElseThrow();
     }
 
+    // ---- read -----------------------------------------------------------------
     public Optional<User> findById(int id) {
         return query("SELECT * FROM users WHERE id = ?", id)
                 .stream().findFirst().map(this::toUser);
     }
 
+    /** Case-insensitive if the e-mail column is declared COLLATE NOCASE. */
     public Optional<User> findByEmail(String email) {
         return query("SELECT * FROM users WHERE email = ?", email)
                 .stream().findFirst().map(this::toUser);
@@ -67,6 +71,7 @@ public class UserRepository {
                 .stream().map(this::toUser).toList();
     }
 
+    // ---- update / delete --------------------------------------------------------
     public void updateProfile(int id, String name, String email) {
         try (PreparedStatement ps = conn().prepareStatement(
                 "UPDATE users SET name = ?, email = ? WHERE id = ?")) {
@@ -79,6 +84,7 @@ public class UserRepository {
         }
     }
 
+    /** Fails with IllegalArgumentException if the user still has donations. */
     public boolean delete(int id) {
         try (PreparedStatement ps = conn().prepareStatement(
                 "DELETE FROM users WHERE id = ?")) {
@@ -92,90 +98,33 @@ public class UserRepository {
         }
     }
 
-    /*public void addAssignment(int volunteerId, String task) {
-        execute("INSERT INTO assignments(volunteer_id, task) VALUES (?,?)",
-                volunteerId, task);
-    }
-
-    private List<String> loadAssignments(int volunteerId) {
-        List<String> tasks = new ArrayList<>();
-
-        try (PreparedStatement ps = conn().prepareStatement(
-                "SELECT task FROM assignments WHERE volunteer_id = ? ORDER BY id")) {
-            ps.setInt(1, volunteerId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    tasks.add(rs.getString(1));
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Could not read assignments", e);
-        }
-
-        return tasks;
-    }
-
-    public void addFoodRequest(int beneficiaryId, Beneficiary.FoodRequest r) {
-        execute("INSERT INTO food_requests(beneficiary_id, item, quantity, requested_on) VALUES (?,?,?,?)",
-                beneficiaryId, r.item(), r.quantity(), r.requestedOn().toString());
-    }
-
-    private List<Beneficiary.FoodRequest> loadFoodRequests(int beneficiaryId) {
-        List<Beneficiary.FoodRequest> requests = new ArrayList<>();
-
-        try (PreparedStatement ps = conn().prepareStatement(
-                "SELECT item, quantity, requested_on FROM food_requests WHERE beneficiary_id = ? ORDER BY id")) {
-            ps.setInt(1, beneficiaryId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    requests.add(new Beneficiary.FoodRequest(
-                            rs.getString(1),
-                            rs.getDouble(2),
-                            LocalDate.parse(rs.getString(3))));
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Could not read food requests", e);
-        }
-
-        return requests;
-    }
-
+    // ---- row -> object mapping ----------------------------------------------------
     private User toUser(Row r) {
         return switch (r.role()) {
             case "DONOR" -> Donor.restore(
-                    r.id(), r.name(), r.email(), r.hash(), r.address());
+                    r.id(), r.name(), r.email(), r.phone(), r.hash(), r.address());
 
             case "VOLUNTEER" -> {
                 List<String> skills = (r.skills() == null || r.skills().isBlank())
                         ? List.of()
-                        : Arrays.asList(r.skills().split(","));
-
-                Volunteer v = Volunteer.restore(
-                        r.id(), r.name(), r.email(), r.hash(),
+                        : Arrays.stream(r.skills().split(",")).map(String::trim).toList();
+                yield Volunteer.restore(
+                        r.id(), r.name(), r.email(), r.phone(), r.hash(),
                         skills, r.availability());
-
-                loadAssignments(r.id()).forEach(v::assign);
-                yield v;
             }
 
-            case "BENEFICIARY" -> {
-                Beneficiary b = Beneficiary.restore(
-                        r.id(), r.name(), r.email(), r.hash(), r.needs());
-
-                loadFoodRequests(r.id()).forEach(b::restoreRequest);
-                yield b;
-            }
+            case "BENEFICIARY" -> Beneficiary.restore(
+                    r.id(), r.name(), r.email(), r.phone(), r.hash(), r.needs());
 
             case "ADMIN" -> Admin.restore(
-                    r.id(), r.name(), r.email(), r.hash());
+                    r.id(), r.name(), r.email(), r.phone(), r.hash());
 
             default -> throw new IllegalStateException(
                     "Unknown role in database: " + r.role());
         };
-    }*/
+    }
+
+    // ---- helpers --------------------------------------------------------------------
     private List<Row> query(String sql, Object... params) {
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
@@ -206,17 +155,6 @@ public class UserRepository {
         }
     }
 
-    private void execute(String sql, Object... params) {
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                ps.setObject(i + 1, params[i]);
-            }
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new DataAccessException("Database write failed", e);
-        }
-    }
-
     private static String roleOf(User u) {
         if (u instanceof Admin) return "ADMIN";
         if (u instanceof Donor) return "DONOR";
@@ -237,6 +175,7 @@ public class UserRepository {
             throw new DataAccessException("Could not read generated id", e);
         }
     }
+
     private static Connection conn() {
         return Database.get();
     }

@@ -1,6 +1,4 @@
 package user;
-import controller.DonationController;
-import donation.Donation;
 
 import java.util.List;
 
@@ -26,7 +24,7 @@ public class Donor extends User{
     //public List<Donation> viewDonations(DonationController controller) {}
 
     //also bc of the db
-    static Donor restore(int userId, String name, String email, String passwordHash, String address) {
+    public static Donor restore(int userId, String named, String name, String email, String passwordHash, String address) {
         return new Donor(userId, name, email, passwordHash,"user.donor", address );
     }
     //getters and setters

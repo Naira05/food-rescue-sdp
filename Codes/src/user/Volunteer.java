@@ -28,7 +28,7 @@ public class Volunteer extends User{
     return List.copyOf(assignments);
     }
     //this thing is an update after adding the db
-    static Volunteer restore(int userId, String name, String email, String passwordHash, List<String> skills, String availability) {
+    public static Volunteer restore(int userId, String named, String name, String email, String passwordHash, List<String> skills, String availability) {
         return new Volunteer(userId, name, email, passwordHash, "user.Volunteer", availability, skills);
     }
 

@@ -13,7 +13,7 @@ public class Admin extends User {
     public String getRole() {
         return "Admin";
     }
-    public static Admin restore(int userId, String name, String email, String passwordHash) {
+    public static Admin restore(int userId, String named, String name, String email, String passwordHash) {
         return new Admin(userId, name, email, passwordHash, "Admin");
     }
     @Override

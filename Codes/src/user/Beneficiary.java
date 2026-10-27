@@ -6,6 +6,11 @@ import java.util.List;
 
 public class Beneficiary extends User {
     private String needs;
+
+    public static User restore(int id, String name, String email, String phone, String hash, String needs) {
+        return null;
+    }
+
     public record FoodRequest(String item, double quantity, LocalDate requestedOn) { }
     private final List<FoodRequest> requests = new ArrayList<>();
 
