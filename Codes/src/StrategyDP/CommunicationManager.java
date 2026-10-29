@@ -12,8 +12,8 @@ public class CommunicationManager {
         this.strategy = strategy;
     }
 
-    public void sendMessage(String recipient, String message) {
-        strategy.sendMessage(recipient, message);
+    public SendResult sendMessage(String recipient, String message) {
+        return strategy.sendMessage(recipient, message);
     }
 
 }

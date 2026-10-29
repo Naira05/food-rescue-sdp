@@ -3,7 +3,7 @@ package ObserverDP;
 
 import StrategyDP.CommunicationManager;
 import StrategyDP.EmailStrategy;
-import StrategyDP.SMSStrategy;
+import StrategyDP.APPStrategy;
 import MVC.database.Database;
 import MVC.database.DonationRepository;
 import DecoratorDP.BasicDonationOperation;
@@ -56,7 +56,7 @@ public class NotificationDemo {
 
         // Create the admin notification observer
         AdminNotification adminObserver = new AdminNotification(
-                new CommunicationManager(new SMSStrategy()),
+                new CommunicationManager(new APPStrategy()),
                 "01012345678"
         );
 
