@@ -1,4 +1,5 @@
 package MVC.database;
+
 import MVC.donation.Donation;
 
 import java.sql.Connection;
@@ -21,6 +22,7 @@ public class DonationRepository {
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
             ps.setInt(1, d.getDonorID());
             ps.setString(2, d.getType());
+            ps.setString(3, d.getDescription());
             ps.setDouble(4, d.getQuantity());
             ps.setString(5, d.getUnit());
             ps.setString(6, d.getExpiryDate().toString());
@@ -54,6 +56,7 @@ public class DonationRepository {
         String sql = "UPDATE donations SET description = ?, quantity = ?, status = ? WHERE id = ?";
 
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, d.getDescription());
             ps.setDouble(2, d.getQuantity());
             ps.setString(3, d.getSt().name());
             ps.setInt(4, d.getDonationID());
@@ -105,7 +108,7 @@ public class DonationRepository {
                 LocalDate.parse(rs.getString("expiry_date")),
                 rs.getString("description"),
                 LocalDate.parse(rs.getString("donation_date")),
-                Donation.Status.valueOf(rs.getString("status")));
+                Donation.Status.of(rs.getString("status")));
     }
 
     private int lastInsertId() throws SQLException {

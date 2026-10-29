@@ -2,8 +2,7 @@ package ObserverDP;
 
 import StrategyDP.CommunicationManager;
 
-
-public class AdminNotification extends DonationEventObserver {
+public class AdminNotification implements DonationObserver {
 
     private final CommunicationManager communicationManager;
     private final String adminRecipient;

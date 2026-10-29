@@ -1,5 +1,6 @@
 package MVC.donation;
 
+import ObserverDP.DonationEvent;
 import ObserverDP.DonationObserver;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class DonationView implements DonationObserver {
     }
 
     @Override
-    public void update(Donation donation) {
-        System.out.println("[View] model changed -> " + donation);
+    public void update(DonationEvent event) {
+        System.out.println("[View] " + event.type() + " -> " + event.donation());
     }
 }

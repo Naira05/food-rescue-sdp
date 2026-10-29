@@ -1,9 +1,48 @@
 package MVC.donation;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Donation {
-    public enum Status{AVAILABLE, CLAIMED,PICKED_UP, EXPIRED};
+
+    /** Fixed set of donation statuses (replaces the old enum). */
+    public static final class Status {
+        public static final Status AVAILABLE = new Status("AVAILABLE");
+        public static final Status CLAIMED   = new Status("CLAIMED");
+        public static final Status PICKED_UP = new Status("PICKED_UP");
+        public static final Status EXPIRED   = new Status("EXPIRED");
+
+        private static final List<Status> ALL = List.of(AVAILABLE, CLAIMED, PICKED_UP, EXPIRED);
+
+        private final String name;
+
+        private Status(String name) {
+            this.name = name;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public static List<Status> values() {
+            return ALL;
+        }
+
+        /** Converts a stored name (e.g. from the database) back into the matching Status. */
+        public static Status of(String name) {
+            for (Status s : ALL) {
+                if (s.name.equals(name)) {
+                    return s;
+                }
+            }
+            throw new IllegalArgumentException("Unknown status: " + name);
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 
     private int donationID;
     private final int donorID;
@@ -13,9 +52,10 @@ public class Donation {
     private final String unit;
     private final LocalDate expiryDate;
     private final LocalDate donationDate;
-    Status st = Status.AVAILABLE;
+    private Status st = Status.AVAILABLE;
 
-    public Donation(int donationID, int donorID, String type, double quantity, String unit, LocalDate expiryDate, LocalDate donationDate, Status st, String description) {
+    public Donation(int donationID, int donorID, String type, double quantity, String unit,
+                    LocalDate expiryDate, LocalDate donationDate, Status st, String description) {
         this.donationID = donationID;
         this.donorID = donorID;
         this.type = type;
@@ -23,7 +63,7 @@ public class Donation {
         this.unit = unit;
         this.expiryDate = expiryDate;
         this.description = description;
-        this.donationDate = LocalDate.now();
+        this.donationDate = donationDate;
         this.st = st;
     }
 
@@ -78,9 +118,12 @@ public class Donation {
     public void setSt(Status st) {
         this.st = st;
     }
-    public static Donation restore(int donationId, int donorId, String type, double quantity, String unit, LocalDate expiryDate, String description, LocalDate donationDate, Status st) {
+
+    public static Donation restore(int donationId, int donorId, String type, double quantity, String unit,
+                                   LocalDate expiryDate, String description, LocalDate donationDate, Status st) {
         return new Donation(donationId, donorId, type, quantity, unit, expiryDate, donationDate, st, description);
     }
+
     @Override
     public String toString() {
         return String.format("Donation#%d [%s] %s - %.1f %s, expires %s, %s (donor %d)",
