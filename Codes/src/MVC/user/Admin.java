@@ -8,9 +8,8 @@ public class Admin extends User {
         super(userID, name, email, passwordHash, role);
     }
 
-    public static Admin restore(int userId, String name, String email, String phone, String passwordHash) {
+    public static Admin restore(int userId, String name, String email, String passwordHash) {
         Admin a = new Admin(userId, name, email, passwordHash, "Admin");
-        a.setPhone(phone);
         return a;
     }
 

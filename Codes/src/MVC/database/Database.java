@@ -25,7 +25,6 @@ public final class Database {
                                           CHECK (role IN ('DONOR','VOLUNTEER','BENEFICIARY','ADMIN')),
                             name          TEXT NOT NULL,
                             email         TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                            phone         TEXT,
                             password_hash TEXT NOT NULL,
                             address       TEXT,
                             skills        TEXT,

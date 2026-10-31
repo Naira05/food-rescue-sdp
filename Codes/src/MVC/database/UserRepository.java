@@ -17,14 +17,14 @@ import java.util.Optional;
 public class UserRepository {
 
     /** Raw row from the users table, turned into a User after the query has closed. */
-    private record Row(int id, String role, String name, String email, String phone, String hash,
+    private record Row(int id, String role, String name, String email, String hash,
                        String address, String skills, String availability, String needs) { }
 
     // ---- create ---------------------------------------------------------------
     /** Inserts the user and returns it again with its database-generated id. */
     public User insert(User u) {
-        String sql = "INSERT INTO users(role, name, email, phone, password_hash, address, skills, "
-                + "availability, needs) VALUES (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO users(role, name, email, password_hash, address, skills, "
+                + "availability, needs) VALUES (?,?,?,?,?,?,?,?)";
 
         String address = null, skills = null, availability = null, needs = null;
 
@@ -41,12 +41,11 @@ public class UserRepository {
             ps.setString(1, roleOf(u));
             ps.setString(2, u.getName());
             ps.setString(3, u.getEmail());
-            ps.setString(4, u.getPhone());
-            ps.setString(5, u.getPasswordHash());
-            ps.setString(6, address);
-            ps.setString(7, skills);
-            ps.setString(8, availability);
-            ps.setString(9, needs);
+            ps.setString(4, u.getPasswordHash());
+            ps.setString(5, address);
+            ps.setString(6, skills);
+            ps.setString(7, availability);
+            ps.setString(8, needs);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not save user", e);
@@ -73,13 +72,12 @@ public class UserRepository {
     }
 
     // ---- update / delete --------------------------------------------------------
-    public void updateProfile(int id, String name, String email, String phone) {
+    public void updateProfile(int id, String name, String email) {
         try (PreparedStatement ps = conn().prepareStatement(
-                "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?")) {
+                "UPDATE users SET name = ?, email = ? WHERE id = ?")) {
             ps.setString(1, name);
             ps.setString(2, email);
-            ps.setString(3, phone);
-            ps.setInt(4, id);
+            ps.setInt(3, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not update user " + id, e);
@@ -151,14 +149,14 @@ public class UserRepository {
     private User toUser(Row r) {
         return switch (r.role()) {
             case "DONOR" -> Donor.restore(
-                    r.id(), r.name(), r.email(), r.phone(), r.hash(), r.address());
+                    r.id(), r.name(), r.email(), r.hash(), r.address());
 
             case "VOLUNTEER" -> {
                 List<String> skills = (r.skills() == null || r.skills().isBlank())
                         ? List.of()
                         : Arrays.stream(r.skills().split(",")).map(String::trim).toList();
                 Volunteer v = Volunteer.restore(
-                        r.id(), r.name(), r.email(), r.phone(), r.hash(),
+                        r.id(), r.name(), r.email(), r.hash(),
                         skills, r.availability());
                 loadAssignments(r.id()).forEach(v::assign);
                 yield v;
@@ -166,13 +164,13 @@ public class UserRepository {
 
             case "BENEFICIARY" -> {
                 Beneficiary b = Beneficiary.restore(
-                        r.id(), r.name(), r.email(), r.phone(), r.hash(), r.needs());
+                        r.id(), r.name(), r.email(), r.hash(), r.needs());
                 loadFoodRequests(r.id()).forEach(b::restoreRequest);
                 yield b;
             }
 
             case "ADMIN" -> Admin.restore(
-                    r.id(), r.name(), r.email(), r.phone(), r.hash());
+                    r.id(), r.name(), r.email(), r.hash());
 
             default -> throw new IllegalStateException(
                     "Unknown role in database: " + r.role());
@@ -195,7 +193,6 @@ public class UserRepository {
                             rs.getString("role"),
                             rs.getString("name"),
                             rs.getString("email"),
-                            rs.getString("phone"),
                             rs.getString("password_hash"),
                             rs.getString("address"),
                             rs.getString("skills"),

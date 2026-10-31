@@ -6,7 +6,6 @@ public abstract class User {
     private int userID;
     private String name;
     private String email;
-    private String phone;
     private String passwordHash;
     private String role;
     private boolean loggedIn;
@@ -44,14 +43,6 @@ public abstract class User {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getPasswordHash() {
         return passwordHash;
     }
@@ -77,14 +68,9 @@ public abstract class User {
     }
 
     // update profile (blank or null values keep the old value)
-    public void updateProfile(String newName, String newEmail, String newPhone) {
+    public void updateProfile(String newName, String newEmail) {
         if (newName != null && !newName.isBlank()) this.name = newName.trim();
         if (newEmail != null && !newEmail.isBlank()) this.email = newEmail.trim();
-        if (newPhone != null && !newPhone.isBlank()) this.phone = newPhone.trim();
-    }
-
-    public void updateProfile(String newName, String newEmail) {
-        updateProfile(newName, newEmail, null);
     }
 
     // abstract methods
@@ -94,7 +80,6 @@ public abstract class User {
 
     @Override
     public String toString() {
-        return getRole() + "#" + userID + " " + name + " <" + email + ">"
-                + (phone == null || phone.isBlank() ? "" : " " + phone);
+        return getRole() + "#" + userID + " " + name + " <" + email + ">";
     }
 }

@@ -54,17 +54,16 @@ public class MainMenu {
         }
         String name = io.prompt("Name");
         String email = io.prompt("E-mail");
-        String phone = io.prompt("Phone (optional)");
         String password = io.prompt("Password (min 6 chars)");
 
         User created = switch (role.trim()) {
-            case "1" -> users.registerDonor(name, email, phone, password, io.prompt("Pickup address"));
+            case "1" -> users.registerDonor(name, email, password, io.prompt("Pickup address"));
             case "2" -> {
                 List<String> skills = Arrays.stream(String.valueOf(io.prompt("Skills (comma separated)")).split(","))
                         .map(String::trim).filter(s -> !s.isEmpty()).toList();
-                yield users.registerVolunteer(name, email, phone, password, skills, io.prompt("Availability"));
+                yield users.registerVolunteer(name, email, password, skills, io.prompt("Availability"));
             }
-            default -> users.registerBeneficiary(name, email, phone, password, io.prompt("Needs"));
+            default -> users.registerBeneficiary(name, email, password, io.prompt("Needs"));
         };
         io.println("Account created: " + created + ". You can log in now.");
     }

@@ -21,10 +21,9 @@ public class Donor extends User {
         return "Donor";
     }
 
-    public static Donor restore(int userId, String name, String email, String phone,
+    public static Donor restore(int userId, String name, String email,
                                 String passwordHash, String address) {
         Donor d = new Donor(userId, name, email, passwordHash, "Donor", address);
-        d.setPhone(phone);
         return d;
     }
 

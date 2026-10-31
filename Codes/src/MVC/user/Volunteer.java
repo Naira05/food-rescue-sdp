@@ -36,10 +36,9 @@ public class Volunteer extends User {
         return List.copyOf(assignments);
     }
 
-    public static Volunteer restore(int userId, String name, String email, String phone,
+    public static Volunteer restore(int userId, String name, String email,
                                     String passwordHash, List<String> skills, String availability) {
         Volunteer v = new Volunteer(userId, name, email, passwordHash, "Volunteer", availability, skills);
-        v.setPhone(phone);
         return v;
     }
 

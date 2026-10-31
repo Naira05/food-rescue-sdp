@@ -17,10 +17,9 @@ public class Beneficiary extends User {
     }
 
 
-    public static Beneficiary restore(int userId, String name, String email, String phone,
+    public static Beneficiary restore(int userId, String name, String email,
                                       String passwordHash, String needs) {
         Beneficiary b = new Beneficiary(userId, name, email, passwordHash, "Beneficiary", needs);
-        b.setPhone(phone);
         return b;
     }
 
