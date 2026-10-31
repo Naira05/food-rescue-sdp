@@ -3,13 +3,15 @@ package config;
 
 public class SystemConfig {
 
-    private static final SystemConfig instance =
-            new SystemConfig();
+    private static SystemConfig instance;
 
     private SystemConfig() {
     }
 
     public static SystemConfig getInstance() {
+        if (instance == null) {
+            instance = new SystemConfig();
+        }
         return instance;
     }
 
