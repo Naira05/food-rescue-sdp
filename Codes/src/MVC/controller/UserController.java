@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 public class UserController {
     private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$");
-    private static final Pattern PHONE = Pattern.compile("^\\+?[0-9 ]{8,15}$");
     private static final int MIN_PASSWORD_LENGTH = 6;
 
     private final UserRepository users;
@@ -23,35 +22,31 @@ public class UserController {
         this.users = users;
     }
 
-    public Donor registerDonor(String name, String email, String phone, String password, String address) {
-        validate(name, email, phone, password);
+    public Donor registerDonor(String name, String email, String password, String address) {
+        validate(name, email, password);
         Donor donor = new Donor(0, name.trim(), email.trim(), PasswordHasher.hash(password), "Donor", address);
-        donor.setPhone(cleanPhone(phone));
         return (Donor) users.insert(donor);
     }
 
-    public Volunteer registerVolunteer(String name, String email, String phone, String password,
+    public Volunteer registerVolunteer(String name, String email, String password,
                                        List<String> skills, String availability) {
-        validate(name, email, phone, password);
+        validate(name, email, password);
         Volunteer volunteer = new Volunteer(0, name.trim(), email.trim(), PasswordHasher.hash(password),
                 "Volunteer", availability, skills);
-        volunteer.setPhone(cleanPhone(phone));
         return (Volunteer) users.insert(volunteer);
     }
 
-    public Beneficiary registerBeneficiary(String name, String email, String phone, String password,
+    public Beneficiary registerBeneficiary(String name, String email, String password,
                                            String needs) {
-        validate(name, email, phone, password);
+        validate(name, email, password);
         Beneficiary beneficiary = new Beneficiary(0, name.trim(), email.trim(),
                 PasswordHasher.hash(password), "Beneficiary", needs);
-        beneficiary.setPhone(cleanPhone(phone));
         return (Beneficiary) users.insert(beneficiary);
     }
 
-    public Admin createAdmin(String name, String email, String phone, String password) {
-        validate(name, email, phone, password);
+    public Admin createAdmin(String name, String email, String password) {
+        validate(name, email, password);
         Admin admin = new Admin(0, name.trim(), email.trim(), PasswordHasher.hash(password), "Admin");
-        admin.setPhone(cleanPhone(phone));
         return (Admin) users.insert(admin);
     }
 
@@ -83,18 +78,15 @@ public class UserController {
         return users.delete(userId);
     }
 
-    public void updateProfile(User user, String newName, String newEmail, String newPhone) {
+    public void updateProfile(User user, String newName, String newEmail) {
         if (newEmail != null && !newEmail.isBlank()) {
             checkEmail(newEmail);
             findByEmail(newEmail).filter(u -> u.getUserID() != user.getUserID()).ifPresent(u -> {
                 throw new IllegalArgumentException("That e-mail is already registered");
             });
         }
-        if (newPhone != null && !newPhone.isBlank()) {
-            checkPhone(newPhone);
-        }
-        user.updateProfile(newName, newEmail, newPhone);
-        users.updateProfile(user.getUserID(), user.getName(), user.getEmail(), user.getPhone());
+        user.updateProfile(newName, newEmail);
+        users.updateProfile(user.getUserID(), user.getName(), user.getEmail());
     }
 
     public void assignTask(Volunteer volunteer, String task) {
@@ -111,16 +103,13 @@ public class UserController {
         return request;
     }
 
-    private void validate(String name, String email, String phone, String password) {
+    private void validate(String name, String email, String password) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name is required");
         }
         checkEmail(email);
         if (users.findByEmail(email.trim()).isPresent()) {
             throw new IllegalArgumentException("That e-mail is already registered");
-        }
-        if (phone != null && !phone.isBlank()) {
-            checkPhone(phone);
         }
         if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
             throw new IllegalArgumentException(
@@ -134,13 +123,4 @@ public class UserController {
         }
     }
 
-    private void checkPhone(String phone) {
-        if (!PHONE.matcher(phone.trim()).matches()) {
-            throw new IllegalArgumentException("Invalid phone number (8-15 digits, optional leading +)");
-        }
-    }
-
-    private static String cleanPhone(String phone) {
-        return phone == null || phone.isBlank() ? null : phone.trim();
-    }
 }

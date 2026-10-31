@@ -94,7 +94,7 @@ public class Main {
         try {
             Wiring w = new Wiring();
             if (w.users.findByEmail(ADMIN_EMAIL).isEmpty()) {
-                w.users.createAdmin("System Admin", ADMIN_EMAIL, null, ADMIN_PASSWORD);
+                w.users.createAdmin("System Admin", ADMIN_EMAIL, ADMIN_PASSWORD);
                 System.out.println("First run: admin account created (" + ADMIN_EMAIL + " / " + ADMIN_PASSWORD + ")");
             }
             new MainMenu(w.users, w.donations, ConsoleIO.keyboard()).run();
@@ -116,22 +116,21 @@ public class Main {
         section("1. Set-up: database, MVC wiring, observers");
         Database.open(url);
         Wiring w = new Wiring();
-        Admin seededAdmin = w.users.createAdmin("System Admin", ADMIN_EMAIL, "01000000000", ADMIN_PASSWORD);
+        Admin seededAdmin = w.users.createAdmin("System Admin", ADMIN_EMAIL, ADMIN_PASSWORD);
         check("admin created with a database id", seededAdmin.getUserID() > 0);
         check("donation types seeded", w.donations.getDonationTypes().size() == 3);
 
         // ---- 2. sign-up ----------------------------------------------------------------
         section("2. Sign-up and validation");
-        Donor donorSaved = w.users.registerDonor("Green Bistro", "bistro@example.com", "01011111111",
+        Donor donorSaved = w.users.registerDonor("Green Bistro", "bistro@example.com",
                 "secret1", "12 Nile St, Cairo");
-        Volunteer volunteerSaved = w.users.registerVolunteer("Omar", "omar@example.com", "01033333333",
+        Volunteer volunteerSaved = w.users.registerVolunteer("Omar", "omar@example.com",
                 "secret2", List.of("driving", "lifting"), "Weekends");
-        Beneficiary beneficiarySaved = w.users.registerBeneficiary("Hope Shelter", "hope@example.org", "01044444444",
+        Beneficiary beneficiarySaved = w.users.registerBeneficiary("Hope Shelter", "hope@example.org",
                 "secret3", "Hot meals for 40 people");
-        check("donor saved with the right name/e-mail/phone",
+        check("donor saved with the right name/e-mail",
                 donorSaved.getName().equals("Green Bistro")
                         && donorSaved.getEmail().equals("bistro@example.com")
-                        && "01011111111".equals(donorSaved.getPhone())
                         && "12 Nile St, Cairo".equals(donorSaved.getAddress()));
         check("volunteer saved with skills and availability",
                 volunteerSaved.getSkills().equals(List.of("driving", "lifting"))
@@ -140,17 +139,14 @@ public class Main {
         check("password is stored hashed", !donorSaved.getPasswordHash().equals("secret1"));
 
         expectError("duplicate e-mail (different case) is rejected",
-                () -> w.users.registerDonor("Dup", "BISTRO@example.com", null, "secret1", "x"),
+                () -> w.users.registerDonor("Dup", "BISTRO@example.com", "secret1", "x"),
                 "already registered");
         expectError("short password is rejected",
-                () -> w.users.registerDonor("Weak", "weak@example.com", null, "123", "x"),
+                () -> w.users.registerDonor("Weak", "weak@example.com", "123", "x"),
                 "at least 6");
         expectError("invalid e-mail is rejected",
-                () -> w.users.registerDonor("Bad", "not-an-email", null, "secret1", "x"),
+                () -> w.users.registerDonor("Bad", "not-an-email", "secret1", "x"),
                 "Invalid e-mail");
-        expectError("invalid phone is rejected",
-                () -> w.users.registerDonor("Bad", "bad@example.com", "12ab", "secret1", "x"),
-                "Invalid phone");
 
         // ---- 3. login --------------------------------------------------------------------
         section("3. Login");
@@ -198,8 +194,8 @@ public class Main {
         check("new donations start AVAILABLE",
                 w.model.findDonation(1).orElseThrow().getSt() == Donation.Status.AVAILABLE);
         User donorInDb = w.users.findById(donor.getUserID()).orElseThrow();
-        check("donor profile edit was saved (name and phone)",
-                donorInDb.getName().equals("Green Bistro Cairo") && "01022222222".equals(donorInDb.getPhone())
+        check("donor profile edit was saved (name)",
+                donorInDb.getName().equals("Green Bistro Cairo")
                         && donorInDb.getEmail().equals("bistro@example.com"));
         expectError("a donation cannot be created with quantity 0",
                 () -> w.donations.createDonation(donor, "Produce", "x", 0, "kg", in2), "Quantity must be positive");

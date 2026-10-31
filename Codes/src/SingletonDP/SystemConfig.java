@@ -1,5 +1,5 @@
 
-package config;
+package SingletonDP;
 
 public class SystemConfig {
 

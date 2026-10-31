@@ -131,8 +131,7 @@ public class UserControlPanel extends ControlPanel {
     private void editProfile() {
         String name = io.prompt("New name (blank = keep)");
         String email = io.prompt("New e-mail (blank = keep)");
-        String phone = io.prompt("New phone (blank = keep)");
-        users.updateProfile(user, name, email, phone);
+        users.updateProfile(user, name, email);
         io.println("Profile updated: " + user);
     }
 
