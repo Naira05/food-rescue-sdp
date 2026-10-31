@@ -5,7 +5,6 @@ import java.util.List;
 
 public class Donation {
 
-    /** Fixed set of donation statuses (replaces the old enum). */
     public static final class Status {
         public static final Status AVAILABLE = new Status("AVAILABLE");
         public static final Status CLAIMED   = new Status("CLAIMED");
@@ -28,7 +27,7 @@ public class Donation {
             return ALL;
         }
 
-        /** Converts a stored name (e.g. from the database) back into the matching Status. */
+
         public static Status of(String name) {
             for (Status s : ALL) {
                 if (s.name.equals(name)) {

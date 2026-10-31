@@ -2,6 +2,7 @@ package MVC.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -57,6 +58,19 @@ public final class Database {
                             quantity       REAL NOT NULL CHECK (quantity > 0),
                             requested_on   TEXT NOT NULL
                         )""");
+                st.execute("""
+                        CREATE TABLE IF NOT EXISTS donation_types (
+                            id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                            name TEXT NOT NULL UNIQUE COLLATE NOCASE
+                        )""");
+                // first run only: give the admin a few types to start with
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM donation_types")) {
+                    if (rs.next() && rs.getInt(1) == 0) {
+                        st.executeUpdate("INSERT INTO donation_types(name) VALUES ('Cooked meals')");
+                        st.executeUpdate("INSERT INTO donation_types(name) VALUES ('Produce')");
+                        st.executeUpdate("INSERT INTO donation_types(name) VALUES ('Packaged food')");
+                    }
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException("Cannot open database " + url, e);

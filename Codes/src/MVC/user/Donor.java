@@ -2,7 +2,7 @@ package MVC.user;
 
 import java.util.List;
 
-public class Donor extends User{
+public class Donor extends User {
     private String address;
 
     public Donor(int userID, String name, String email, String passwordHash, String role, String address) {
@@ -10,27 +10,29 @@ public class Donor extends User{
         this.address = address;
     }
 
-    //implementation of abstract methods
+    // implementation of abstract methods
     @Override
     public List<String> getMenuOptions() {
         return List.of("Create donation", "My donations", "View receipt", "Edit profile");
     }
+
     @Override
-    public String getRole(){
+    public String getRole() {
         return "Donor";
     }
 
-    //implementation of class methods
-    //public List<Donation> viewDonations(DonationController controller) {}
-
-    //also bc of the db
-    public static Donor restore(int userId, String named, String name, String email, String passwordHash, String address) {
-        return new Donor(userId, name, email, passwordHash,"user.donor", address );
+    public static Donor restore(int userId, String name, String email, String phone,
+                                String passwordHash, String address) {
+        Donor d = new Donor(userId, name, email, passwordHash, "Donor", address);
+        d.setPhone(phone);
+        return d;
     }
-    //getters and setters
+
+    // getters and setters
     public String getAddress() {
         return address;
     }
+
     public void setAddress(String address) {
         this.address = address;
     }

@@ -11,7 +11,7 @@ public abstract class User {
     private String role;
     private boolean loggedIn;
 
-    public User(int userID , String name, String email , String passwordHash, String role){
+    public User(int userID, String name, String email, String passwordHash, String role) {
         this.userID = userID;
         this.name = name;
         this.email = email;
@@ -44,9 +44,13 @@ public abstract class User {
         this.email = email;
     }
 
-    public String getPhone() {return phone; }
+    public String getPhone() {
+        return phone;
+    }
 
-    public void setPhone(String phone) {this.phone = phone;}
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
     public String getPasswordHash() {
         return passwordHash;
@@ -56,12 +60,15 @@ public abstract class User {
         this.passwordHash = passwordHash;
     }
 
-    //login and logout
-    public boolean login(String inputPassword){
-        this.loggedIn = this.passwordHash.equals(inputPassword);
+    // login and logout
+    /** Hashes the typed password and compares it with the stored hash. */
+    public boolean login(String inputPassword) {
+        this.loggedIn = inputPassword != null
+                && this.passwordHash.equals(PasswordHasher.hash(inputPassword));
         return this.loggedIn;
     }
-    public void logout(){
+
+    public void logout() {
         loggedIn = false;
     }
 
@@ -69,14 +76,25 @@ public abstract class User {
         return this.loggedIn;
     }
 
-    //update profile
-    public void updateProfile(String newName, String newEmail) {
-        if (newName != null && !newName.isBlank()) this.name = newName;
-        if (newEmail != null && !newEmail.isBlank()) this.email = newEmail;
+    // update profile (blank or null values keep the old value)
+    public void updateProfile(String newName, String newEmail, String newPhone) {
+        if (newName != null && !newName.isBlank()) this.name = newName.trim();
+        if (newEmail != null && !newEmail.isBlank()) this.email = newEmail.trim();
+        if (newPhone != null && !newPhone.isBlank()) this.phone = newPhone.trim();
     }
 
-    //abstract methods
+    public void updateProfile(String newName, String newEmail) {
+        updateProfile(newName, newEmail, null);
+    }
+
+    // abstract methods
     public abstract List<String> getMenuOptions();
+
     public abstract String getRole();
 
+    @Override
+    public String toString() {
+        return getRole() + "#" + userID + " " + name + " <" + email + ">"
+                + (phone == null || phone.isBlank() ? "" : " " + phone);
+    }
 }
