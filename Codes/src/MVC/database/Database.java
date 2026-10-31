@@ -63,6 +63,13 @@ public final class Database {
                             id   INTEGER PRIMARY KEY AUTOINCREMENT,
                             name TEXT NOT NULL UNIQUE COLLATE NOCASE
                         )""");
+                st.execute("""
+                        CREATE TABLE IF NOT EXISTS notifications (
+                            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                            recipient  TEXT NOT NULL,
+                            message    TEXT NOT NULL,
+                            created_at TEXT NOT NULL
+                        )""");
                 // first run only: give the admin a few types to start with
                 try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM donation_types")) {
                     if (rs.next() && rs.getInt(1) == 0) {
