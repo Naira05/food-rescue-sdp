@@ -7,7 +7,7 @@ import java.util.Properties;
 public class EmailStrategy implements CommunicationStrategy {
 
     private static final String SENDER = "sdpproject41@gmail.com";
-    private static final String APP_PASSWORD = "mqzwnjloxcsldjhw";
+    private static final String APP_PASSWORD = "iojhhjjotmdzxjmp";
 
     @Override
     public SendResult sendMessage(String recipient, String message) {

@@ -11,6 +11,7 @@ import MVC.user.*;
 import ObserverDP.AdminNotification;
 import ObserverDP.DonorNotification;
 import StrategyDP.APPStrategy;
+import StrategyDP.EmailStrategy;
 import StrategyDP.CommunicationManager;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -30,7 +31,7 @@ import java.util.concurrent.Executors;
  *   run:  java -cp "out:lib/sqlite-jdbc.jar" Server        (then open http://localhost:8080)
  */
 public class Server {
-    static final String ADMIN_EMAIL = "admin@foodrescue.org";
+    static final String ADMIN_EMAIL = "sdpproject41@gmail.com";
     static final String ADMIN_PASSWORD = "admin123";
 
     static UserController users;
@@ -43,9 +44,10 @@ public class Server {
         DonationModel model = new DonationModel(new DonationRepository());
         users = new UserController(new UserRepository());
         donations = new DonationController(model, new DonationView());
-        CommunicationManager comms = new CommunicationManager(new APPStrategy());
-        model.attach(new DonorNotification(comms, users::findById));
-        model.attach(new AdminNotification(comms, ADMIN_EMAIL));
+        CommunicationManager donorComms = new CommunicationManager(new APPStrategy());
+        CommunicationManager adminComms = new CommunicationManager(new EmailStrategy());
+        model.attach(new DonorNotification(donorComms, users::findById));
+        model.attach(new AdminNotification(adminComms, ADMIN_EMAIL));
         if (users.findByEmail(ADMIN_EMAIL).isEmpty()) {
             users.createAdmin("System Admin", ADMIN_EMAIL, ADMIN_PASSWORD);
             System.out.println("Admin created: " + ADMIN_EMAIL + " / " + ADMIN_PASSWORD);
