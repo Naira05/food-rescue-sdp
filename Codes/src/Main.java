@@ -1,7 +1,10 @@
 //NOTE: i didnt write this demo
 
-import FactoryDP.DonationFactory;
-import FactoryDP.DonationProcessor;
+import FactoryDP.Creator.CashCreator;
+import FactoryDP.Creator.DonationCreation;
+import FactoryDP.Creator.DonationRequest;
+import FactoryDP.Creator.FoodCreator;
+import FactoryDP.Creator.GoodsCreator;
 import MVC.controller.AdminPanel;
 import MVC.controller.DonationController;
 import MVC.controller.UserController;
@@ -160,14 +163,9 @@ public class Main {
         check("all four roles log in as the right class", donor.isLoggedIn() && volunteer.isLoggedIn()
                 && beneficiary.isLoggedIn() && admin.isLoggedIn());
 
-        // ---- 4. Factory and Strategy --------------------------------------------------------
-        section("4. Factory pattern and Strategy pattern");
-        DonationFactory factory = new DonationFactory();
-        for (String type : List.of("cash", "food", "goods")) {
-            DonationProcessor processor = factory.createDonation(type);
-            processor.process();
-        }
-        expectError("factory rejects an unknown type", () -> factory.createDonation("gold"), "Invalid donation type");
+        // ---- 4. Strategy (the Factory Method demo is section 10: it saves donations,
+        //      so running it here would shift the donation ids checked below) ---------------
+        section("4. Strategy pattern");
         SendResult first = w.comms.sendMessage("someone@example.com", "Strategy 1: console + in-app");
         w.comms.setStrategy(new APPStrategy());
         SendResult second = w.comms.sendMessage("volunteer_omar", "Strategy 2: in-app only (swapped at runtime)");
@@ -271,8 +269,39 @@ public class Main {
         check("exactly 1 donation remains", again.model.findAll().size() == 1);
         check("donation types survived (3, none re-seeded)", again.donations.getDonationTypes().size() == 3);
 
-        // ---- 10. access control -----------------------------------------------------------------------------------------
-        section("10. Access control after logout");
+        // ---- 10. Factory Method ----------------------------------------------------------------------------------------
+        section("10. Factory Method pattern (cash, food and goods creators)");
+        int donorId = donor.getUserID();
+        int before = again.model.findByDonor(donorId).size();
+        List<DonationCreation> creators = List.of(
+                new CashCreator(again.model), new FoodCreator(again.model), new GoodsCreator(again.model));
+        List<DonationRequest> requests = List.of(
+                DonationRequest.cash(donorId, 250, "egp", "Monthly support"),
+                DonationRequest.food(donorId, 15, "kg", "Fresh vegetables", in2),
+                DonationRequest.goods(donorId, 8, "", "Winter blankets"));
+        List<String> expectedTypes = List.of("CASH", "FOOD", "GOODS");
+        for (int i = 0; i < creators.size(); i++) {
+            Donation saved = creators.get(i).donate(requests.get(i));
+            check(creators.get(i).getClass().getSimpleName() + " saved a " + expectedTypes.get(i) + " donation",
+                    saved.getDonationID() > 0 && saved.getType().equals(expectedTypes.get(i)));
+        }
+        check("donor has 3 more donations", again.model.findByDonor(donorId).size() == before + 3);
+        check("cash currency normalised, goods unit defaulted",
+                again.model.findByDonor(donorId).stream().anyMatch(d -> d.getUnit().equals("EGP"))
+                        && again.model.findByDonor(donorId).stream().anyMatch(d -> d.getUnit().equals("pcs")));
+        expectError("expired food is rejected",
+                () -> creators.get(1).donate(DonationRequest.food(donorId, 5, "kg", "Old bread", yesterday)),
+                "Expiry date");
+        expectError("goods quantity must be whole",
+                () -> creators.get(2).donate(DonationRequest.goods(donorId, 2.5, "pcs", "Chairs")),
+                "whole number");
+        expectError("cash currency must be a 3-letter code",
+                () -> creators.get(0).donate(DonationRequest.cash(donorId, 100, "EURO", "Gift")),
+                "Currency");
+        expectError("creator rejects a missing request", () -> creators.get(0).donate(null), "cannot be null");
+
+        // ---- 11. access control -----------------------------------------------------------------------------------------
+        section("11. Access control after logout");
         expectError("a logged-out user cannot open a dashboard",
                 () -> new UserControlPanel(donor, again.donations, again.users, ConsoleIO.scripted("0")).run(),
                 "not logged in");
