@@ -1,4 +1,5 @@
 package ObserverDP;
+import StrategyDP.SendResult;
 
 import MVC.donation.Donation;
 import MVC.user.User;
@@ -31,7 +32,10 @@ public class DonorNotification implements DonationObserver {
             return; // nobody to notify
         }
 
-        communicationManager.sendMessage(donor.get().getEmail(), message);
+        SendResult result = communicationManager.sendMessage(donor.get().getEmail(), message);
+        if (!result.isSuccess()) {
+            System.err.println("[Notification] " + result.getDetails());
+        }
     }
 
     private String buildMessage(DonationEvent event) {
