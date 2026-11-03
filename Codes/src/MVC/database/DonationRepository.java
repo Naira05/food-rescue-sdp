@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** All SQL for the donations table. */
 public class DonationRepository {
 
     public Donation insert(Donation d) {
@@ -51,7 +50,6 @@ public class DonationRepository {
         return query("SELECT * FROM donations WHERE donor_id = ? ORDER BY id", donorId);
     }
 
-    /** Updates the editable fields. Returns false if no row has that id. */
     public boolean update(Donation d) {
         String sql = "UPDATE donations SET description = ?, quantity = ?, status = ? WHERE id = ?";
 
@@ -75,8 +73,6 @@ public class DonationRepository {
             throw new DataAccessException("Could not delete donation " + id, e);
         }
     }
-
-    // ---- helpers ------------------------------------------------------------
 
     private List<Donation> query(String sql, Object... params) {
         try (PreparedStatement ps = conn().prepareStatement(sql)) {

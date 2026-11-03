@@ -75,7 +75,7 @@ public class Main {
 
             // Observer pattern: notified on every donation change
             model.attach(new DonorNotification(comms, users::findById));
-            model.attach(new AdminNotification(comms, ADMIN_EMAIL));
+            model.attach(new AdminNotification(comms, ADMIN_EMAIL, users::findById));
         }
     }
 
