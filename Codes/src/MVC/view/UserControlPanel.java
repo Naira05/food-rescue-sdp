@@ -47,6 +47,8 @@ public class UserControlPanel extends ControlPanel {
             case "2" -> donations.showDonations(donations.getDonationsByDonor(donor.getUserID()));
             case "3" -> viewReceipt(donor);
             case "4" -> editProfile();
+            case "5" -> io.println("Tax deduction: "
+                    + donor.calculate_tax_deduction(donations.getDonationsByDonor(donor.getUserID())));
             default -> io.println("Unknown option.");
         }
     }
@@ -80,6 +82,7 @@ public class UserControlPanel extends ControlPanel {
             case "2" -> claimPickup(volunteer);
             case "3" -> showAssignments(volunteer);
             case "4" -> editProfile();
+            case "5" -> io.println(volunteer.viewCertificate());
             default -> io.println("Unknown option.");
         }
     }

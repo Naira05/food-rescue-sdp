@@ -1,5 +1,7 @@
 package MVC.user;
 
+import SingletonDP.SystemConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +25,8 @@ public class Volunteer extends User {
 
     @Override
     public List<String> getMenuOptions() {
-        return List.of("Available pickups", "Claim a pickup", "My assignments", "Edit profile");
+        return List.of("Available pickups", "Claim a pickup", "My assignments", "Edit profile",
+                "View certificate");
     }
 
     // implementation of the class methods
@@ -34,6 +37,15 @@ public class Volunteer extends User {
 
     public List<String> viewAssignment() {
         return List.copyOf(assignments);
+    }
+
+    /** Builds a certificate from the volunteer's completed assignments. */
+    public String viewCertificate() {
+        return "===== CERTIFICATE OF APPRECIATION =====\n"
+                + SystemConfig.getInstance().getOrganizationName() + " thanks " + getName() + "\n"
+                + "for completing " + assignments.size() + " assignment(s).\n"
+                + "Skills: " + (skills.isEmpty() ? "-" : String.join(", ", skills)) + "\n"
+                + "=======================================";
     }
 
     public static Volunteer restore(int userId, String name, String email,

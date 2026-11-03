@@ -284,9 +284,10 @@ const VIEWS = {
   async types(main) {
     const t = await api('types');
     main.innerHTML = head('Donation types', 'What donors can choose from.') +
-      `<div class="panel"><div class="chips">${t.map(x => `<span class="chip">${esc(x)}<button data-rt="${esc(x)}" title="Remove">✕</button></span>`).join('')}</div>
+      `<div class="panel"><div class="chips">${t.map(x => `<span class="chip">${esc(x)}<button data-et="${esc(x)}" title="Rename">✎</button><button data-rt="${esc(x)}" title="Remove">✕</button></span>`).join('')}</div>
       <form class="inline" id="tf"><input name="name" placeholder="New type, e.g. Bakery" required><button class="btn btn-accent">Add type</button></form></div>`;
     $('#tf').onsubmit = guard(async e => { e.preventDefault(); const r = await api('types', 'POST', Object.fromEntries(new FormData(e.target))); toast(r.added ? 'Type added' : 'Already exists'); dashboard(); });
+    main.querySelectorAll('[data-et]').forEach(b => b.onclick = guard(async () => { const n = prompt('New name for ' + b.dataset.et, b.dataset.et); if (!n || n.trim() === b.dataset.et) return; const r = await api('types/' + encodeURIComponent(b.dataset.et), 'PUT', { name: n.trim() }); toast(r.renamed ? 'Type renamed' : 'Name already exists'); dashboard(); }));
     main.querySelectorAll('[data-rt]').forEach(b => b.onclick = guard(async () => { await api('types/' + encodeURIComponent(b.dataset.rt), 'DELETE'); toast('Type removed'); dashboard(); }));
   }
 };

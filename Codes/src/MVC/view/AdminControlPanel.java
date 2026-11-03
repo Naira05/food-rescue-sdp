@@ -31,6 +31,8 @@ public class AdminControlPanel extends ControlPanel {
             case "7" -> updateStatus();
             case "8" -> io.println(admin.deleteDonationRecord(io.promptInt("Donation id")) ? "Deleted." : "No such donation.");
             case "9" -> io.println(admin.generateReports());
+            case "10" -> io.println(admin.renameDonationType(io.prompt("Type to rename"), io.prompt("New name"))
+                    ? "Renamed." : "No such type, or the new name already exists.");
             default -> io.println("Unknown option.");
         }
     }
