@@ -51,6 +51,11 @@ public class AdminPanel {
         return donations.addDonationType(name);
     }
 
+    public boolean renameDonationType(String oldName, String newName) {
+        requireAdmin();
+        return donations.renameDonationType(oldName, newName);
+    }
+
     public boolean removeDonationType(String name) {
         requireAdmin();
         return donations.removeDonationType(name);

@@ -173,6 +173,11 @@ public class Server {
                 need(me instanceof Admin, "Admins only");
                 send(ex, 200, "{\"added\":" + donations.addDonationType(str(body(ex), "name")) + "}");
             }
+            case "PUT types" -> {
+                need(me instanceof Admin, "Admins only");
+                String name = java.net.URLDecoder.decode(s[1], StandardCharsets.UTF_8);
+                send(ex, 200, "{\"renamed\":" + donations.renameDonationType(name, str(body(ex), "name")) + "}");
+            }
             case "DELETE types" -> {
                 need(me instanceof Admin, "Admins only");
                 String name = java.net.URLDecoder.decode(s[1], StandardCharsets.UTF_8);

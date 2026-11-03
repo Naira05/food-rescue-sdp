@@ -18,4 +18,9 @@ public class SystemConfig {
     public String getOrganizationName() {
         return "Surplus Food Rescue Network";
     }
+
+    /** Share of a cash donation that the donor can deduct from taxes. */
+    public double getTaxDeductionRate() {
+        return 0.5;
+    }
 }

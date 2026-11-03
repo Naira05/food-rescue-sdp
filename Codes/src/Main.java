@@ -1,5 +1,3 @@
-//NOTE: i didnt write this demo
-
 import FactoryDP.Creator.CashCreator;
 import FactoryDP.Creator.DonationCreation;
 import FactoryDP.Creator.DonationRequest;
@@ -24,6 +22,7 @@ import MVC.view.ConsoleIO;
 import MVC.view.MainMenu;
 import MVC.view.UserControlPanel;
 import ObserverDP.AdminNotification;
+import ObserverDP.DonationEvent;
 import ObserverDP.DonorNotification;
 import StrategyDP.APPStrategy;
 import StrategyDP.CommunicationManager;
@@ -312,6 +311,26 @@ public class Main {
         expectError("a logged-out admin cannot call admin actions",
                 () -> new AdminPanel(admin, again.donations, again.users).generateReports(),
                 "not logged in");
+
+        // ---- 12. lookup-table update, reminders, certificate, tax deduction ------------------------------------------
+        section("12. Rename a donation type, event reminders, volunteer certificate, donor tax deduction");
+        check("donation type renamed", again.donations.renameDonationType("Cooked meals", "Hot meals"));
+        check("existing donation follows the renamed type",
+                again.model.findDonation(1).orElseThrow().getType().equals("Hot meals"));
+        check("rename to an existing type is refused", !again.donations.renameDonationType("Hot meals", "Produce"));
+        check("rename of a missing type is refused", !again.donations.renameDonationType("Gadgets", "Toys"));
+        DonationEvent event = DonationEvent.created(again.model.findDonation(1).orElseThrow());
+        event.registerUsers(volunteerAgain);
+        event.registerUsers(beneficiaryAgain);
+        event.registerUsers(volunteerAgain);                                   // already registered
+        check("two users registered for the reminder", event.registeredUsers().size() == 2);
+        event.sendReminder();
+        String certificate = volunteerAgain.viewCertificate();
+        System.out.println(certificate);
+        check("certificate names the volunteer and the assignment count",
+                certificate.contains(volunteerAgain.getName()) && certificate.contains("1 assignment"));
+        double deduction = donor.calculate_tax_deduction(again.model.findByDonor(donorId));
+        check("tax deduction is half of the 250 EGP cash donation", deduction == 125.0);
 
         Database.close();
 

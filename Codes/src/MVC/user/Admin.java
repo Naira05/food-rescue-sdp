@@ -23,6 +23,6 @@ public class Admin extends User {
     public List<String> getMenuOptions() {
         return List.of("List users", "Remove user", "List donation types", "Add donation type",
                 "Remove donation type", "List donation records", "Update donation status",
-                "Delete donation record", "Generate report");
+                "Delete donation record", "Generate report", "Rename donation type");
     }
 }

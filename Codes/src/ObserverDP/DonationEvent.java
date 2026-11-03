@@ -1,14 +1,18 @@
 package ObserverDP;
 
 import MVC.donation.Donation;
+import MVC.user.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public record DonationEvent(Type type,
                             Donation donation,
                             Donation.Status previousStatus,
-                            LocalDateTime occurredAt) {
+                            LocalDateTime occurredAt,
+                            List<User> registeredUsers) {
 
     /** Kind of change that happened to a donation (replaces the old DonationEventType enum). */
     public static final class Type {
@@ -40,21 +44,38 @@ public record DonationEvent(Type type,
         if (type == Type.STATUS_CHANGED && previousStatus == null) {
             throw new IllegalArgumentException("STATUS_CHANGED needs the previous status");
         }
+        registeredUsers = registeredUsers == null ? new ArrayList<>() : new ArrayList<>(registeredUsers);
+    }
+
+    /** Registers a user to be reminded about this donation event. */
+    public void registerUsers(User user) {
+        Objects.requireNonNull(user, "user");
+        if (!registeredUsers.contains(user)) {
+            registeredUsers.add(user);
+        }
+    }
+
+    /** Sends a reminder about the donation to every registered user. */
+    public void sendReminder() {
+        for (User user : registeredUsers) {
+            System.out.println("Reminder to " + user.getEmail() + ": donation #" + donation.getDonationID()
+                    + " (" + donation.getDescription() + ") is " + donation.getSt());
+        }
     }
 
     public static DonationEvent created(Donation donation) {
-        return new DonationEvent(Type.CREATED, donation, null, LocalDateTime.now());
+        return new DonationEvent(Type.CREATED, donation, null, LocalDateTime.now(), null);
     }
 
     public static DonationEvent updated(Donation donation) {
-        return new DonationEvent(Type.UPDATED, donation, null, LocalDateTime.now());
+        return new DonationEvent(Type.UPDATED, donation, null, LocalDateTime.now(), null);
     }
 
     public static DonationEvent statusChanged(Donation donation, Donation.Status previousStatus) {
-        return new DonationEvent(Type.STATUS_CHANGED, donation, previousStatus, LocalDateTime.now());
+        return new DonationEvent(Type.STATUS_CHANGED, donation, previousStatus, LocalDateTime.now(), null);
     }
 
     public static DonationEvent removed(Donation donation) {
-        return new DonationEvent(Type.REMOVED, donation, null, LocalDateTime.now());
+        return new DonationEvent(Type.REMOVED, donation, null, LocalDateTime.now(), null);
     }
 }

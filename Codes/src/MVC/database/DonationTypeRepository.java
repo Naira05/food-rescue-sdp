@@ -47,6 +47,25 @@ public class DonationTypeRepository {
         }
     }
 
+    /** Returns false if the old name is missing or the new name is taken. Existing donations follow the rename. */
+    public boolean rename(String oldName, String newName) {
+        if (!exists(oldName) || exists(newName)) {
+            return false;
+        }
+        try (PreparedStatement type = conn().prepareStatement("UPDATE donation_types SET name = ? WHERE name = ?");
+             PreparedStatement donations = conn().prepareStatement("UPDATE donations SET type = ? WHERE type = ?")) {
+            type.setString(1, newName);
+            type.setString(2, oldName);
+            type.executeUpdate();
+            donations.setString(1, newName);
+            donations.setString(2, oldName);
+            donations.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not rename donation type", e);
+        }
+    }
+
     /** Returns false if there was no type with this name. */
     public boolean remove(String name) {
         try (PreparedStatement ps = conn().prepareStatement("DELETE FROM donation_types WHERE name = ?")) {

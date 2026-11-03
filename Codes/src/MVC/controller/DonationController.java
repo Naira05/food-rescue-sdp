@@ -142,6 +142,13 @@ public class DonationController {
         return types.add(name.trim());
     }
 
+    public boolean renameDonationType(String oldName, String newName) {
+        if (oldName == null || oldName.isBlank() || newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("Old and new type names are required");
+        }
+        return types.rename(oldName.trim(), newName.trim());
+    }
+
     public boolean removeDonationType(String name) {
         return types.remove(name == null ? "" : name.trim());
     }
