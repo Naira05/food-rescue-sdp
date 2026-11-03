@@ -48,11 +48,6 @@ public class DonationModel implements DonationSubject {
             }
         }
     }
-
-    public void notifyObservers(Donation d) {
-        notifyObservers(DonationEvent.updated(d));
-    }
-
     // donation methods
     public Donation saveDonation(Donation donation) {
         repository.insert(donation);
@@ -73,7 +68,7 @@ public class DonationModel implements DonationSubject {
         // read the stored version first so we can tell whether the status changed
         Optional<Donation> before = repository.findById(d.getDonationID());
         if(!repository.update(d)){
-            throw new IllegalArgumentException("No donation with ID: " + d.getDonationID() + "was found");
+            throw new IllegalArgumentException("No donation with ID: " + d.getDonationID() + " was found");
         }
         if (before.isPresent() && before.get().getSt() != d.getSt()) {
             notifyObservers(DonationEvent.statusChanged(d, before.get().getSt()));

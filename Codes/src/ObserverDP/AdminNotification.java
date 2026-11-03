@@ -1,5 +1,5 @@
 package ObserverDP;
-
+import StrategyDP.SendResult;
 import StrategyDP.CommunicationManager;
 
 public class AdminNotification implements DonationObserver {
@@ -18,6 +18,9 @@ public class AdminNotification implements DonationObserver {
         if (event.previousStatus() != null) {
             message += " (was " + event.previousStatus() + ")";
         }
-        communicationManager.sendMessage(adminRecipient, message);
+        SendResult result = communicationManager.sendMessage(adminRecipient, message);
+        if (!result.isSuccess()) {
+            System.err.println("[Notification] " + result.getDetails());
+        }
     }
 }
