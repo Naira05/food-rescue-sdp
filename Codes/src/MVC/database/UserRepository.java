@@ -16,12 +16,9 @@ import java.util.Optional;
 
 public class UserRepository {
 
-    /** Raw row from the users table, turned into a User after the query has closed. */
     private record Row(int id, String role, String name, String email, String hash,
                        String address, String skills, String availability, String needs) { }
 
-    // ---- create ---------------------------------------------------------------
-    /** Inserts the user and returns it again with its database-generated id. */
     public User insert(User u) {
         String sql = "INSERT INTO users(role, name, email, password_hash, address, skills, "
                 + "availability, needs) VALUES (?,?,?,?,?,?,?,?)";
@@ -54,13 +51,11 @@ public class UserRepository {
         return findById(lastInsertId()).orElseThrow();
     }
 
-    // ---- read -----------------------------------------------------------------
     public Optional<User> findById(int id) {
         return query("SELECT * FROM users WHERE id = ?", id)
                 .stream().findFirst().map(this::toUser);
     }
 
-    /** Case-insensitive, because the e-mail column is declared COLLATE NOCASE. */
     public Optional<User> findByEmail(String email) {
         return query("SELECT * FROM users WHERE email = ?", email)
                 .stream().findFirst().map(this::toUser);
@@ -71,7 +66,6 @@ public class UserRepository {
                 .stream().map(this::toUser).toList();
     }
 
-    // ---- update / delete --------------------------------------------------------
     public void updateProfile(int id, String name, String email) {
         try (PreparedStatement ps = conn().prepareStatement(
                 "UPDATE users SET name = ?, email = ? WHERE id = ?")) {
@@ -84,7 +78,6 @@ public class UserRepository {
         }
     }
 
-    /** Fails with IllegalArgumentException if the user still has donations. */
     public boolean delete(int id) {
         try (PreparedStatement ps = conn().prepareStatement(
                 "DELETE FROM users WHERE id = ?")) {
@@ -98,7 +91,6 @@ public class UserRepository {
         }
     }
 
-    // ---- volunteer assignments ------------------------------------------------------
     public void addAssignment(int volunteerId, String task) {
         execute("INSERT INTO assignments(volunteer_id, task) VALUES (?,?)", volunteerId, task);
     }
@@ -119,7 +111,6 @@ public class UserRepository {
         return tasks;
     }
 
-    // ---- beneficiary food requests ----------------------------------------------------
     public void addFoodRequest(int beneficiaryId, Beneficiary.FoodRequest r) {
         execute("INSERT INTO food_requests(beneficiary_id, item, quantity, requested_on) VALUES (?,?,?,?)",
                 beneficiaryId, r.item(), r.quantity(), r.requestedOn().toString());
@@ -145,7 +136,6 @@ public class UserRepository {
         return requests;
     }
 
-    // ---- row -> object mapping ----------------------------------------------------
     private User toUser(Row r) {
         return switch (r.role()) {
             case "DONOR" -> Donor.restore(
@@ -177,7 +167,6 @@ public class UserRepository {
         };
     }
 
-    // ---- helpers --------------------------------------------------------------------
     private List<Row> query(String sql, Object... params) {
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
