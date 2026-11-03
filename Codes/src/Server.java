@@ -47,7 +47,7 @@ public class Server {
         CommunicationManager donorComms = new CommunicationManager(new APPStrategy());
         CommunicationManager adminComms = new CommunicationManager(new EmailStrategy());
         model.attach(new DonorNotification(donorComms, users::findById));
-        model.attach(new AdminNotification(adminComms, ADMIN_EMAIL));
+        model.attach(new AdminNotification(adminComms, ADMIN_EMAIL, users::findById));
         if (users.findByEmail(ADMIN_EMAIL).isEmpty()) {
             users.createAdmin("System Admin", ADMIN_EMAIL, ADMIN_PASSWORD);
             System.out.println("Admin created: " + ADMIN_EMAIL + " / " + ADMIN_PASSWORD);

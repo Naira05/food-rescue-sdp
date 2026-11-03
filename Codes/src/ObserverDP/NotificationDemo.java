@@ -57,7 +57,8 @@ public class NotificationDemo {
         // Create the admin notification observer
         AdminNotification adminObserver = new AdminNotification(
                 new CommunicationManager(new APPStrategy()),
-                "01012345678"
+                "01012345678",
+                id -> id == 1 ? Optional.of(dina) : Optional.empty()
         );
 
         // Register the observers
