@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/** All SQL for the notifications table. */
 public class NotificationRepository {
 
     public void insert(String recipient, String message) {
