@@ -10,7 +10,7 @@ import DecoratorDP.BasicDonationOperation;
 import MVC.donation.Donation;
 import MVC.donation.DonationModel;
 import DecoratorDP.DonationOperation;
-import MVC.donation.DonationView;
+import MVC.view.DonationView;
 import DecoratorDP.ReceiptDecorator;
 import DecoratorDP.TaxDocumentDecorator;
 import MVC.user.Donor;

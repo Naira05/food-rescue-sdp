@@ -6,7 +6,7 @@ import MVC.database.NotificationRepository;
 import MVC.database.UserRepository;
 import MVC.donation.Donation;
 import MVC.donation.DonationModel;
-import MVC.donation.DonationView;
+import MVC.view.DonationView;
 import MVC.user.*;
 import ObserverDP.AdminNotification;
 import ObserverDP.DonorNotification;

@@ -1,5 +1,6 @@
-package MVC.donation;
+package MVC.view;
 
+import MVC.donation.Donation;
 import ObserverDP.DonationEvent;
 import ObserverDP.DonationObserver;
 

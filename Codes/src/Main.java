@@ -11,7 +11,7 @@ import MVC.database.DonationRepository;
 import MVC.database.UserRepository;
 import MVC.donation.Donation;
 import MVC.donation.DonationModel;
-import MVC.donation.DonationView;
+import MVC.view.DonationView;
 import MVC.user.Admin;
 import MVC.user.Beneficiary;
 import MVC.user.Donor;
