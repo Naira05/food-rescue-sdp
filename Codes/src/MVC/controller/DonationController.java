@@ -7,7 +7,7 @@ import DecoratorDP.TaxDocumentDecorator;
 import MVC.database.DonationTypeRepository;
 import MVC.donation.Donation;
 import MVC.donation.DonationModel;
-import MVC.donation.DonationView;
+import MVC.view.DonationView;
 import MVC.user.Donor;
 
 import java.time.LocalDate;
