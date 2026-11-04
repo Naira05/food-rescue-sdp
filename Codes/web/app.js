@@ -148,9 +148,9 @@ async function logout(silent) {
 /* ---------------------------------------------------------------- dashboard */
 const MENUS = {
   DONOR: [['mine', '📦', 'My donations'], ['notes', '🔔', 'Notifications']],
-  VOLUNTEER: [['pickups', '🧺', 'Available pickups'], ['tasks', '🚲', 'My assignments'], ['notes', '🔔', 'Notifications']],
-  BENEFICIARY: [['browse', '🥗', 'Available food'], ['requests', '📝', 'My requests'], ['notes', '🔔', 'Notifications']],
-  ADMIN: [['overview', '📊', 'Overview'], ['donations', '📦', 'Donations'], ['users', '👥', 'Users'], ['types', '🏷️', 'Donation types'], ['notes', '🔔', 'Notifications']]
+  VOLUNTEER: [['pickups', '🧺', 'Available pickups'], ['tasks', '🚲', 'My assignments']],
+  BENEFICIARY: [['browse', '🥗', 'Available food'], ['requests', '📝', 'My requests']],
+  ADMIN: [['overview', '📊', 'Overview'], ['donations', '📦', 'Donations'], ['users', '👥', 'Users'], ['types', '🏷️', 'Donation types']]
 };
 
 function dashboard() {

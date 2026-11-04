@@ -33,7 +33,6 @@ public class DonationTypeRepository {
         }
     }
 
-    /** Returns false if a type with this name already exists. */
     public boolean add(String name) {
         if (exists(name)) {
             return false;
@@ -47,7 +46,6 @@ public class DonationTypeRepository {
         }
     }
 
-    /** Returns false if the old name is missing or the new name is taken. Existing donations follow the rename. */
     public boolean rename(String oldName, String newName) {
         if (!exists(oldName) || exists(newName)) {
             return false;
@@ -65,8 +63,6 @@ public class DonationTypeRepository {
             throw new DataAccessException("Could not rename donation type", e);
         }
     }
-
-    /** Returns false if there was no type with this name. */
     public boolean remove(String name) {
         try (PreparedStatement ps = conn().prepareStatement("DELETE FROM donation_types WHERE name = ?")) {
             ps.setString(1, name);
