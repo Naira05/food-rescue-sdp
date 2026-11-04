@@ -150,7 +150,7 @@ const MENUS = {
   DONOR: [['mine', '📦', 'My donations'], ['notes', '🔔', 'Notifications']],
   VOLUNTEER: [['pickups', '🧺', 'Available pickups'], ['tasks', '🚲', 'My assignments']],
   BENEFICIARY: [['browse', '🥗', 'Available food'], ['requests', '📝', 'My requests']],
-  ADMIN: [['overview', '📊', 'Overview'], ['donations', '📦', 'Donations'], ['users', '👥', 'Users'], ['types', '🏷️', 'Donation types']]
+  ADMIN: [['overview', '📊', 'Overview'], ['donations', '📦', 'Donations'], ['users', '👥', 'Users'], ['allrequests', '📝', 'Food requests'], ['types', '🏷️', 'Donation types']]
 };
 
 function dashboard() {
@@ -281,6 +281,11 @@ const VIEWS = {
       `<div class="panel tw"><table><tr><th>Name</th><th>E-mail</th><th>Role</th><th></th></tr>${u.map(x => `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.email)}</td><td>${ICON[x.role]} ${LABEL[x.role]}</td>
       <td>${x.id === S.user.id ? '<small style="color:var(--muted)">you</small>' : `<button class="btn btn-danger btn-sm" data-rm="${x.id}">Remove</button>`}</td></tr>`).join('')}</table></div>`;
     main.querySelectorAll('[data-rm]').forEach(b => b.onclick = guard(async () => { if (!confirm('Remove this user?')) return; await api('users/' + b.dataset.rm, 'DELETE'); toast('User removed'); dashboard(); }));
+  },
+  async allrequests(main) {
+    const r = await api('requests');
+    main.innerHTML = head('Food requests', `${r.length} request${r.length === 1 ? '' : 's'} from beneficiaries.`) +
+      (r.length ? `<div class="panel tw"><table><tr><th>Date</th><th>Beneficiary</th><th>Item</th><th>Quantity</th></tr>${r.slice().reverse().map(x => `<tr><td>${x.requestedOn}</td><td><b>${esc(x.beneficiaryName)}</b><br><small style="color:var(--muted)">${esc(x.beneficiaryEmail)}</small></td><td>${esc(x.item)}</td><td><span class="pill">${x.quantity}</span></td></tr>`).join('')}</table></div>` : empty('📝', 'No requests yet.'));
   },
   async types(main) {
     const t = await api('types');

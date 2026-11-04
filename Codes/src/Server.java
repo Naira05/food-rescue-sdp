@@ -109,7 +109,7 @@ public class Server {
             case "GET donations" -> {
                 List<Donation> l = me instanceof Donor ? donations.getDonationsByDonor(me.getUserID())
                         : me instanceof Admin ? donations.getDonations()
-                        : donations.getAvailableDonations();
+                          : donations.getAvailableDonations();
                 send(ex, 200, donationList(l));
             }
             case "POST donations" -> {
@@ -148,12 +148,19 @@ public class Server {
                 send(ex, 200, strList(((Volunteer) me).viewAssignment()));
             }
             case "GET requests" -> {
-                need(me instanceof Beneficiary, "Beneficiaries only");
+                need(me instanceof Beneficiary || me instanceof Admin, "Not allowed");
+                // a beneficiary sees their own requests, the admin sees everyone's
+                List<User> owners = me instanceof Admin ? users.getAllUsers() : List.of(me);
                 StringBuilder sb = new StringBuilder("[");
-                for (Beneficiary.FoodRequest r : ((Beneficiary) me).getRequests()) {
-                    if (sb.length() > 1) sb.append(',');
-                    sb.append("{\"item\":").append(q(r.item())).append(",\"quantity\":").append(r.quantity())
-                            .append(",\"requestedOn\":").append(q(r.requestedOn().toString())).append('}');
+                for (User u : owners) {
+                    if (!(u instanceof Beneficiary b)) continue;
+                    for (Beneficiary.FoodRequest r : b.getRequests()) {
+                        if (sb.length() > 1) sb.append(',');
+                        sb.append("{\"item\":").append(q(r.item())).append(",\"quantity\":").append(r.quantity())
+                                .append(",\"requestedOn\":").append(q(r.requestedOn().toString()))
+                                .append(",\"beneficiaryName\":").append(q(b.getName()))
+                                .append(",\"beneficiaryEmail\":").append(q(b.getEmail())).append('}');
+                    }
                 }
                 send(ex, 200, sb.append(']').toString());
             }
@@ -338,8 +345,8 @@ public class Server {
         String n = file.getFileName().toString();
         String type = n.endsWith(".css") ? "text/css; charset=utf-8"
                 : n.endsWith(".js") ? "text/javascript; charset=utf-8"
-                : n.endsWith(".svg") ? "image/svg+xml"
-                : "text/html; charset=utf-8";
+                  : n.endsWith(".svg") ? "image/svg+xml"
+                    : "text/html; charset=utf-8";
         sendBytes(ex, 200, type, Files.readAllBytes(file));
     }
 
