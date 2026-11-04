@@ -216,8 +216,9 @@ const VIEWS = {
        <div class="stat"><div class="n">${l.filter(d => d.status === 'AVAILABLE').length}</div><div class="l">Waiting for pickup</div></div>
        <div class="stat"><div class="n">${l.filter(d => d.status === 'PICKED_UP').length}</div><div class="l">Delivered</div></div>
        <div class="stat"><div class="n">${Math.round(total)}</div><div class="l">Total units shared</div></div></div>` +
-      (l.length ? `<div class="cards">${l.slice().reverse().map((d, i) => donationCard(d, '', i)).join('')}</div>` : empty('🍲', 'No donations yet. Your first one takes under a minute.'));
+      (l.length ? `<div class="cards">${l.slice().reverse().map((d, i) => donationCard(d, `<button class="btn btn-ghost btn-sm" data-receipt="${d.id}">🧾 Receipt</button>`, i)).join('')}</div>` : empty('🍲', 'No donations yet. Your first one takes under a minute.'));
     $('#new').onclick = donationModal;
+    main.querySelectorAll('[data-receipt]').forEach(b => b.onclick = guard(() => receiptModal(b.dataset.receipt)));
   },
 
   /* ---- volunteer */
@@ -314,9 +315,27 @@ async function donationModal() {
   document.body.append(o);
   $('#df', o).onsubmit = async e => {
     e.preventDefault();
-    try { await api('donations', 'POST', Object.fromEntries(new FormData(e.target))); o.remove(); toast('Donation shared. Thank you! 💚'); dashboard(); }
+    try { const d = await api('donations', 'POST', Object.fromEntries(new FormData(e.target))); o.remove(); toast('Donation shared. Thank you! 💚'); dashboard(); receiptModal(d.id).catch(er => toast(er.message, true)); }
     catch (er) { $('#de', o).textContent = er.message; }
   };
+}
+async function receiptModal(id) {
+  const r = await api(`donations/${id}/receipt`);
+  const d = r.donation;
+  const row = (k, v) => `<div class="rc-row"><span>${k}</span><b>${esc(v)}</b></div>`;
+  const o = document.createElement('div');
+  o.className = 'overlay';
+  o.onclick = e => { if (e.target === o) o.remove(); };
+  o.innerHTML = `<div class="modal receipt">
+    <div class="rc-head"><div class="rc-icon">🧾</div><h2>Donation receipt</h2><p class="sub">${esc(r.organization)}</p></div>
+    <div class="rc-no">${esc(r.receiptNo)}</div>
+    <div class="rc-block">${row('Date', d.donationDate)}${row('Donor', r.donorName)}${row('E-mail', r.donorEmail)}${r.donorAddress ? row('Address', r.donorAddress) : ''}</div>
+    <div class="rc-block">${row('Type', d.type)}${row('Description', d.description)}${row('Quantity', d.quantity + ' ' + d.unit)}${row('Expires', d.expiryDate)}${row('Status', d.status.replace('_', ' ').toLowerCase())}</div>
+    <p class="rc-thanks">Thank you for helping us turn surplus into meals. 💚</p>
+    <div class="rc-actions no-print"><button class="btn btn-ghost" data-print>🖨️ Print</button><button class="btn btn-accent" data-close>Close</button></div></div>`;
+  document.body.append(o);
+  $('[data-print]', o).onclick = () => window.print();
+  $('[data-close]', o).onclick = () => o.remove();
 }
 
 /* ---------------------------------------------------------------- boot */

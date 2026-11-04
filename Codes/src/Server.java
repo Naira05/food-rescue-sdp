@@ -119,6 +119,13 @@ public class Server {
                         num(b, "quantity"), str(b, "unit"), date(str(b, "expiryDate")));
                 send(ex, 201, donation(d));
             }
+            case "GET receipt" -> {
+                int id = Integer.parseInt(s[1]);
+                Donation d = donations.findDonation(id)
+                        .orElseThrow(() -> new HttpError(404, "Donation not found"));
+                need(me instanceof Admin || d.getDonorID() == me.getUserID(), "This is not your donation");
+                send(ex, 200, receipt(d));
+            }
             case "POST claim" -> {
                 need(me instanceof Volunteer || me instanceof Beneficiary, "Only volunteers or beneficiaries can claim");
                 int id = Integer.parseInt(s[1]);
@@ -272,6 +279,16 @@ public class Server {
                 + ",\"expiryDate\":" + q(d.getExpiryDate().toString())
                 + ",\"donationDate\":" + q(d.getDonationDate().toString())
                 + ",\"status\":" + q(d.getSt().name()) + "}";
+    }
+    static String receipt(Donation d) {
+        User donor = users.findById(d.getDonorID()).orElse(null);
+        String address = donor instanceof Donor dn ? dn.getAddress() : null;
+        return "{\"receiptNo\":" + q(String.format("FR-%06d", d.getDonationID()))
+                + ",\"organization\":" + q(SingletonDP.SystemConfig.getInstance().getOrganizationName())
+                + ",\"donorName\":" + q(donor == null ? "Unknown donor" : donor.getName())
+                + ",\"donorEmail\":" + q(donor == null ? null : donor.getEmail())
+                + ",\"donorAddress\":" + q(address)
+                + ",\"donation\":" + donation(d) + "}";
     }
 
     static String donationList(List<Donation> l) {

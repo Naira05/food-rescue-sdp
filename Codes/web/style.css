@@ -178,3 +178,22 @@ tr:last-child td{border:0}
   .side{position:static}.menu{display:flex;overflow-x:auto;gap:6px}.menu button{white-space:nowrap;width:auto}.menu .sp{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---- receipt */
+.modal.receipt{width:min(440px,100%);text-align:center}
+.rc-head .rc-icon{font-size:2rem}
+.rc-head h2{margin:6px 0 2px}
+.rc-no{display:inline-block;margin:6px 0 16px;padding:4px 14px;border-radius:999px;background:var(--sage-2);border:1px solid var(--line);font-weight:700;letter-spacing:.06em;font-size:.85rem}
+.rc-block{text-align:left;border-top:1px dashed var(--line);padding:12px 0}
+.rc-row{display:flex;justify-content:space-between;gap:16px;padding:5px 0;font-size:.94rem}
+.rc-row span{color:var(--muted)}
+.rc-row b{text-align:right;font-weight:600;word-break:break-word}
+.rc-thanks{border-top:1px dashed var(--line);padding-top:14px;color:var(--muted);font-size:.9rem}
+.rc-actions{display:flex;gap:10px;margin-top:16px}
+.rc-actions .btn{width:auto;flex:1;margin-top:0}
+@media print{
+  body *{visibility:hidden}
+  .overlay,.overlay *{visibility:visible}
+  .overlay{position:absolute;inset:0;background:#fff;backdrop-filter:none;display:block}
+  .modal.receipt{--paper:#fff;--ink:#000;--muted:#555;--line:#bbb;--sage-2:#eee;box-shadow:none;max-height:none;margin:0 auto;color:#000;background:#fff}
+  .no-print{display:none!important}
+}
